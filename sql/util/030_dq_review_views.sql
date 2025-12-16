@@ -5,7 +5,6 @@ SELECT
 	sbi.session_code,
 	sbi.product_name,
 	sbi.vendor_name,
-	sbi.role,
 	sbi.quantity_used,
 	CASE
 		WHEN sbi.quantity_used IS NULL OR sbi.quantity_used <= 0 THEN 'QTY_NON_POSITIVE'

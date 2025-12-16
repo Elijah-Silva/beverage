@@ -7,6 +7,6 @@ COPY sessions (session_code, brewing_method_name, rating, water_type, session_ty
 	DELIMITER ',' CSV HEADER;
 
 COPY session_batch_inventory (session_code, product_name, vendor_name, production_date, quantity_used,
-                              quantity_output, role, batch_code, unit)
+                              quantity_output, unit)
 	FROM '/home/elijah/beverage/data/raw/session_batch_inventory.csv'
 	DELIMITER ',' CSV HEADER;

@@ -1,5 +1,12 @@
 SET SEARCH_PATH = core;
 
+CREATE SEQUENCE batch_inventory_seq
+    START 1
+    INCREMENT 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 INSERT INTO core.batch_inventory (
 	product_id,
 	order_item_id,
@@ -7,7 +14,8 @@ INSERT INTO core.batch_inventory (
 	quantity_count,
 	quantity_weight,
 	is_in_stock,
-	received_date
+	received_date,
+	batch_code
 )
 SELECT
 	oi.product_id,
@@ -16,7 +24,8 @@ SELECT
 	oi.quantity_count,
 	oi.quantity_weight,
 	p.is_active,
-	o.order_date
+	o.order_date,
+	CONCAT(oi.product_id, '-', TO_CHAR(o.order_date, 'YYYYMMDD'), '-', nextval('batch_inventory_seq')) AS batch_code
 FROM core.order_items   oi
 LEFT JOIN core.products p
 	ON p.product_id = oi.product_id
@@ -29,8 +38,6 @@ INSERT INTO core.session_batch_inventory (
 	production_date,
 	quantity_used,
 	quantity_output,
-	role_id,
-	batch_code,
 	unit
 )
 SELECT
@@ -39,8 +46,6 @@ SELECT
 	sbi.production_date,
 	sbi.quantity_used,
 	sbi.quantity_output,
-	r.role_id,
-	sbi.batch_code,
 	sbi.unit
 FROM stage.session_batch_inventory sbi
 JOIN core.vendors                  v
@@ -54,7 +59,5 @@ JOIN core.batch_inventory          bi
 		   bi.production_date = sbi.production_date
 			   OR bi.production_date IS NULL
 		   )
-JOIN ref.roles                     r
-	ON r.role_name = sbi.role
 JOIN core.sessions                 s
 	ON s.session_code = sbi.session_code;

@@ -78,6 +78,8 @@ $PSQL -f "$SQL_DIR/core/extractions/010_load_from_stage.sql"
 $PSQL -f "$SQL_DIR/core/inventory/000_create_tables.sql"
 $PSQL -f "$SQL_DIR/core/inventory/010_load_from_orders.sql"
 
+$PSQL -f "$SQL_DIR/bootstrap/999_grants.sql"
+
 # util tables
 $PSQL -f "$SQL_DIR/util/020_fk_review_views.sql"
 $PSQL -f "$SQL_DIR/util/030_dq_review_views.sql"

@@ -12,6 +12,7 @@ CREATE TABLE batch_inventory
 	received_date      DATE        NOT NULL DEFAULT CURRENT_DATE,
 	created_date       DATE         NOT NULL DEFAULT NOW(),
 	last_modified_date DATE         NOT NULL DEFAULT NOW(),
+	batch_code			TEXT		NOT NULL,
 	FOREIGN KEY (product_id) REFERENCES core.products (product_id),
 	FOREIGN KEY (order_item_id) REFERENCES core.order_items (order_item_id),
 	UNIQUE (product_id, order_item_id),
@@ -26,7 +27,6 @@ CREATE TABLE session_batch_inventory (
 	production_date             DATE,
     quantity_used               INT     NOT NULL CHECK (quantity_used >= 1),
 	quantity_output             NUMERIC,    CHECK (quantity_output >= 1),
-    role_id                     INT     NOT NULL,
     batch_code                  TEXT,
     unit                        TEXT    NOT NULL CHECK (unit IN ('pcs', 'g')),
 	UNIQUE (session_id, batch_inventory_id)

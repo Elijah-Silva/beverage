@@ -5,6 +5,7 @@ CREATE TABLE products (
 	product_alt_name    TEXT,
     product_type        TEXT,
     vendor_name         TEXT,
+    role                TEXT,
     region              TEXT,
     roast_level         TEXT,
     origin_type         TEXT,

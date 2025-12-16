@@ -13,6 +13,7 @@ INSERT INTO stage.raw_products (
 	product_alt_name,
 	product_type,
 	vendor_name,
+	role,
 	region,
 	roast_level,
 	origin_type,
@@ -34,6 +35,7 @@ SELECT
 	TRIM(product_alt_name),
 	TRIM(product_type),
 	TRIM(vendor_name),
+	TRIM(role),
 	TRIM(region),
 	TRIM(roast_level),
 	TRIM(origin_type),
@@ -57,6 +59,7 @@ INSERT INTO stage.products (
 	product_alt_name,
 	product_type,
 	vendor_name,
+	role,
 	region,
 	is_active,
 	notes
@@ -66,6 +69,7 @@ SELECT
 	product_alt_name,
 	product_type,
 	vendor_name,
+	role,
 	region,
 	is_active,
 	notes

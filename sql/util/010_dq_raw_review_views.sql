@@ -72,7 +72,6 @@ FROM (
 	        ('MISSING_PRODUCT_NAME', product_name IS NULL),
 	        ('MISSING_VENDOR_NAME', vendor_name IS NULL),
 	        ('MISSING_QUANITTY_USED', quantity_used IS NULL),
-	        ('MISSING_ROLE', role IS NULL),
 	        ('MISSING_UNIT', unit IS NULL)
 	) AS checks(issue_type, is_null)
 	WHERE is_null
@@ -178,7 +177,8 @@ FROM (
 	        ('MISSING_PRODUCT_NAME', product_name IS NULL),
 	        ('MISSING_TYPE', product_type IS NULL),
 	        ('MISSING_VENDOR', vendor_name IS NULL),
-            ('MISSING_ACTIVE_STATUS', is_active IS NULL)
+            ('MISSING_ACTIVE_STATUS', is_active IS NULL),
+			('MISSING_ROLE', role IS NULL)
 	) AS checks(issue_type, is_null)
 	WHERE is_null
 	GROUP BY issue_type

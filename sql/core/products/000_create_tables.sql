@@ -7,6 +7,7 @@ CREATE TABLE products
 	product_alt_name   TEXT    NOT NULL,
 	product_type_id    INT     NOT NULL,
 	vendor_id          INT     NOT NULL,
+	role_id				INT		NOT NULL,
 	region             TEXT,
 	is_active          BOOLEAN NOT NULL DEFAULT TRUE,
 	created_date       DATE    NOT NULL DEFAULT NOW(),

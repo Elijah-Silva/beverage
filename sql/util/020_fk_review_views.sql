@@ -1,78 +1,6 @@
 SET SEARCH_PATH = util;
 
--- session_batch_inventory
-CREATE OR REPLACE VIEW util.session_batch_fk_review AS
-SELECT
-	sbi.session_code,
-	sbi.product_name,
-	sbi.vendor_name,
-	sbi.role,
-	CASE
-		WHEN v.vendor_id IS NULL THEN 'NO_MATCH_VENDOR'
-		WHEN r.role_id IS NULL THEN 'NO_MATCH_ROLE'
-		WHEN s.session_id IS NULL THEN 'NO_MATCH_SESSION'
-		WHEN p.product_id IS NULL THEN 'NO_MATCH_PRODUCT'
-		WHEN bi.batch_inventory_id IS NULL THEN 'NO_MATCH_BATCH_INVENTORY'
-		WHEN bi.production_date IS NULL THEN 'NO_MATCH_PRODUCTION_DATE'
-		ELSE 'OTHER'
-		END AS reason
-FROM stage.session_batch_inventory sbi
-LEFT JOIN core.vendors             v
-	ON v.vendor_name = sbi.vendor_name
-LEFT JOIN ref.roles                r
-	ON r.role_name = sbi.role
-LEFT JOIN core.sessions            s
-	ON s.session_code = sbi.session_code
-LEFT JOIN core.products            p
-	ON p.product_name = sbi.product_name AND p.vendor_id = v.vendor_id
-LEFT JOIN core.batch_inventory     bi
-	ON bi.product_id = p.product_id AND bi.production_date = sbi.production_date
-WHERE p.product_type_id IN (SELECT
-	                            product_type_id
-                            FROM ref.product_types
-                            WHERE product_type_name IN ('Coffee', 'Tea'))
-	AND (v.vendor_id IS NULL
-   OR r.role_id IS NULL
-   OR s.session_id IS NULL
-   OR p.product_id IS NULL
-   OR bi.batch_inventory_id IS NULL
-   OR bi.production_date IS NULL)
 
-UNION ALL
-
-SELECT
-	sbi.session_code,
-	sbi.product_name,
-	sbi.vendor_name,
-	sbi.role,
-	CASE
-		WHEN v.vendor_id IS NULL THEN 'NO_MATCH_VENDOR'
-		WHEN r.role_id IS NULL THEN 'NO_MATCH_ROLE'
-		WHEN s.session_id IS NULL THEN 'NO_MATCH_SESSION'
-		WHEN p.product_id IS NULL THEN 'NO_MATCH_PRODUCT'
-		WHEN bi.batch_inventory_id IS NULL THEN 'NO_MATCH_BATCH_INVENTORY'
-		ELSE 'OTHER'
-		END AS reason
-FROM stage.session_batch_inventory sbi
-LEFT JOIN core.vendors             v
-	ON v.vendor_name = sbi.vendor_name
-LEFT JOIN ref.roles                r
-	ON r.role_name = sbi.role
-LEFT JOIN core.sessions            s
-	ON s.session_code = sbi.session_code
-LEFT JOIN core.products            p
-	ON p.product_name = sbi.product_name AND p.vendor_id = v.vendor_id
-LEFT JOIN core.batch_inventory     bi
-	ON bi.product_id = p.product_id
-WHERE p.product_type_id IN (SELECT
-	                            product_type_id
-                            FROM ref.product_types
-                            WHERE product_type_name NOT IN ('Coffee', 'Tea'))
-	AND v.vendor_id IS NULL
-   OR r.role_id IS NULL
-   OR s.session_id IS NULL
-   OR p.product_id IS NULL
-   OR bi.batch_inventory_id IS NULL;
 
 -- vendors
 CREATE OR REPLACE VIEW util.vendors_fk_review AS
@@ -97,30 +25,6 @@ WHERE cv.vendor_id IS NULL
    OR cc.country_code_id IS NULL
    OR currc.currency_code_id IS NULL;
 
--- sessions
-CREATE OR REPLACE VIEW util.sessions_fk_review AS
-SELECT
-	s.session_code,
-	s.brewing_method_name,
-	s.session_location_name,
-	s.location_name,
-	CASE
-		WHEN bm.brewing_method_id IS NULL THEN 'NO_MATCH_BREWING_METHOD'
-		WHEN sl.session_location_id IS NULL THEN 'NO_MATCH_SESSION_LOCATION'
-		WHEN l.location_id IS NULL THEN 'NO_MATCH_LOCATION'
-		ELSE 'OTHER'
-		END AS reason
-FROM stage.sessions             s
-LEFT JOIN ref.brewing_methods   bm
-	ON bm.brewing_method_name = s.brewing_method_name
-LEFT JOIN ref.session_locations sl
-	ON sl.session_location_name = s.session_location_name
-LEFT JOIN core.locations        l
-	ON l.location_name = s.location_name
-WHERE bm.brewing_method_id IS NULL
-   OR sl.session_location_id IS NULL
-   OR l.location_id IS NULL;
-
 -- locations
 CREATE OR REPLACE VIEW util.locations_fk_review AS
 SELECT
@@ -134,42 +38,31 @@ LEFT JOIN ref.country_codes cc
 	ON cc.country_code = l.country_code
 WHERE cc.country_code_id IS NULL;
 
--- extractions
-CREATE OR REPLACE VIEW util.extractions_fk_review AS
-SELECT
-	e.session_code,
-	CASE
-		WHEN s.session_id IS NULL THEN 'NO_MATCH_SESSSION'
-		ELSE 'OTHER'
-		END AS reason
-FROM stage.extractions  e
-LEFT JOIN core.sessions s
-	ON s.session_code = e.session_code
-WHERE s.session_id IS NULL;
-
 -- products
 CREATE OR REPLACE VIEW util.products_fk_review AS
 SELECT
-	cp.product_id,
-	p.product_name,
-	p.product_type,
-	p.vendor_name,
-	CASE
-		WHEN cv.vendor_id IS NULL THEN 'NO_MATCH_VENDOR'
-		WHEN pt.product_type_id IS NULL THEN 'NO_MATCH_PRODUCT_TYPE'
-		ELSE 'OTHER'
-		END AS reason
+    cp.product_id,
+    p.product_name,
+    p.product_type,
+    p.vendor_name,
+    CASE
+        WHEN r.role_id IS NULL THEN 'NO_MATCH_ROLE'
+        WHEN cv.vendor_id IS NULL THEN 'NO_MATCH_VENDOR'
+        WHEN pt.product_type_id IS NULL THEN 'NO_MATCH_PRODUCT_TYPE'
+        ELSE 'OTHER'
+    END AS reason
 FROM stage.products         p
+LEFT JOIN ref.roles r
+    ON r.role_name = p.role
 LEFT JOIN core.vendors      cv
-	ON cv.vendor_name = p.vendor_name
+    ON cv.vendor_name = p.vendor_name
 LEFT JOIN ref.product_types pt
-	ON pt.product_type_name = p.product_type
-LEFT JOIN core.products          cp
-	ON p.product_name = cp.product_name
-	AND cp.vendor_id = cv.vendor_id
-	AND cp.product_type_id = pt.product_type_id
-WHERE cv.vendor_id IS NULL
-   OR pt.product_type_id IS NULL;
+    ON pt.product_type_name = p.product_type
+LEFT JOIN core.products     cp
+    ON p.product_name = cp.product_name
+    AND cp.vendor_id = cv.vendor_id
+    AND cp.product_type_id = pt.product_type_id
+WHERE cp.product_id IS NULL;
 
 -- products_coffee
 CREATE OR REPLACE VIEW util.products_coffee_fk_review AS
@@ -314,3 +207,104 @@ RIGHT JOIN get_country_names gcn
 JOIN core.products           p
 	ON p.product_id = gcn.product_id
 WHERE cc.country_code_id IS NULL;
+
+-- session_batch_inventory
+CREATE OR REPLACE VIEW util.session_batch_fk_review AS
+SELECT
+	sbi.session_code,
+	sbi.product_name,
+	sbi.vendor_name,
+	CASE
+		WHEN v.vendor_id IS NULL THEN 'NO_MATCH_VENDOR'
+		WHEN s.session_id IS NULL THEN 'NO_MATCH_SESSION'
+		WHEN p.product_id IS NULL THEN 'NO_MATCH_PRODUCT'
+		WHEN bi.batch_inventory_id IS NULL THEN 'NO_MATCH_BATCH_INVENTORY'
+		WHEN bi.production_date IS NULL THEN 'NO_MATCH_PRODUCTION_DATE'
+		ELSE 'OTHER'
+		END AS reason
+FROM stage.session_batch_inventory sbi
+LEFT JOIN core.vendors             v
+	ON v.vendor_name = sbi.vendor_name
+LEFT JOIN core.sessions            s
+	ON s.session_code = sbi.session_code
+LEFT JOIN core.products            p
+	ON p.product_name = sbi.product_name AND p.vendor_id = v.vendor_id
+LEFT JOIN core.batch_inventory     bi
+	ON bi.product_id = p.product_id AND bi.production_date = sbi.production_date
+WHERE p.product_type_id IN (SELECT
+	                            product_type_id
+                            FROM ref.product_types
+                            WHERE product_type_name IN ('Coffee', 'Tea'))
+	AND (v.vendor_id IS NULL
+   OR s.session_id IS NULL
+   OR p.product_id IS NULL
+   OR bi.batch_inventory_id IS NULL
+   OR bi.production_date IS NULL)
+
+UNION ALL
+
+SELECT
+	sbi.session_code,
+	sbi.product_name,
+	sbi.vendor_name,
+	CASE
+		WHEN v.vendor_id IS NULL THEN 'NO_MATCH_VENDOR'
+		WHEN s.session_id IS NULL THEN 'NO_MATCH_SESSION'
+		WHEN p.product_id IS NULL THEN 'NO_MATCH_PRODUCT'
+		WHEN bi.batch_inventory_id IS NULL THEN 'NO_MATCH_BATCH_INVENTORY'
+		ELSE 'OTHER'
+		END AS reason
+FROM stage.session_batch_inventory sbi
+LEFT JOIN core.vendors             v
+	ON v.vendor_name = sbi.vendor_name
+LEFT JOIN core.sessions            s
+	ON s.session_code = sbi.session_code
+LEFT JOIN core.products            p
+	ON p.product_name = sbi.product_name AND p.vendor_id = v.vendor_id
+LEFT JOIN core.batch_inventory     bi
+	ON bi.product_id = p.product_id
+WHERE p.product_type_id IN (SELECT
+	                            product_type_id
+                            FROM ref.product_types
+                            WHERE product_type_name NOT IN ('Coffee', 'Tea'))
+	AND (v.vendor_id IS NULL
+   OR s.session_id IS NULL
+   OR p.product_id IS NULL
+   OR bi.batch_inventory_id IS NULL);
+
+-- sessions
+CREATE OR REPLACE VIEW util.sessions_fk_review AS
+SELECT
+	s.session_code,
+	s.brewing_method_name,
+	s.session_location_name,
+	s.location_name,
+	CASE
+		WHEN bm.brewing_method_id IS NULL THEN 'NO_MATCH_BREWING_METHOD'
+		WHEN sl.session_location_id IS NULL THEN 'NO_MATCH_SESSION_LOCATION'
+		WHEN l.location_id IS NULL THEN 'NO_MATCH_LOCATION'
+		ELSE 'OTHER'
+		END AS reason
+FROM stage.sessions             s
+LEFT JOIN ref.brewing_methods   bm
+	ON bm.brewing_method_name = s.brewing_method_name
+LEFT JOIN ref.session_locations sl
+	ON sl.session_location_name = s.session_location_name
+LEFT JOIN core.locations        l
+	ON l.location_name = s.location_name
+WHERE bm.brewing_method_id IS NULL
+   OR sl.session_location_id IS NULL
+   OR l.location_id IS NULL;
+
+-- extractions
+CREATE OR REPLACE VIEW util.extractions_fk_review AS
+SELECT
+	e.session_code,
+	CASE
+		WHEN s.session_id IS NULL THEN 'NO_MATCH_SESSSION'
+		ELSE 'OTHER'
+		END AS reason
+FROM stage.extractions  e
+LEFT JOIN core.sessions s
+	ON s.session_code = e.session_code
+WHERE s.session_id IS NULL;

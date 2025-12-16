@@ -10,11 +10,14 @@ import numpy as np
 import uuid
 
 # Page config
-st.set_page_config(page_title='Beverage Web App', page_icon=':coffee:', layout='centered', initial_sidebar_state='auto')
+st.set_page_config(page_title='Beverage Web App', page_icon=':tea:', layout='centered', initial_sidebar_state='auto')
 
 # App config
 csv_file_path = '/home/elijah/beverage/data/raw'
 role_options = ('Accessories', 'Cup', 'Kettle', 'Teapot', 'Gongfu', 'Faircup', 'Espresso Maker')
+role_ingredient = 'Tea Dose'
+session_type = 'Tea'
+
 
 @st.cache_data
 def load_reference_tables(csv_file_path):
@@ -42,13 +45,14 @@ def load_reference_tables(csv_file_path):
                                         'vendor_name': 'vendor',
                                         'production_date': 'production date'}))
     
-    ingredient_ref_table = reference_table[reference_table['type'].isin(['Tea', 'Coffee'])].sort_values(['type', 'name'])
+    ingredient_ref_table = reference_table[reference_table['type'].isin(['Tea'])].sort_values(['type', 'name']).drop(columns=['type'])
     equip_ref_table = reference_table[reference_table['type'] == 'Equipment'].drop(columns=['production date', 'type'])
     
     return ingredient_ref_table, equip_ref_table
 
 def main():
-    st.title('Log Brew')
+    st.title('Log Brewed Tea')
+
 
     if 'session_code' not in st.session_state:
         st.session_state['session_code'] = uuid.uuid4()
@@ -57,6 +61,7 @@ def main():
 
      # Load reference tables (cached)
     ingredient_ref_table, equip_ref_table = load_reference_tables(csv_file_path)
+
 
     # Initialize session state CSVs
     for name in ['sessions', 'products', 'session_batch_inventory', 'extractions', 'order_items']:
@@ -68,20 +73,43 @@ def main():
         st.success('✅ Successfully saved all brewing data!')
         st.session_state['save_success'] = False
 
-    rating = st.slider('Rating', min_value=0, step=1, max_value=10)
+    # Ingredient section
+    st.subheader('Ingredient Details')
+
+    ingredient_ref_table["display"] = (
+        ingredient_ref_table["name"].str.ljust(25)
+        + " ------------ "
+        + ingredient_ref_table["vendor"].str.ljust(25)
+        + " ------------ "
+        + ingredient_ref_table["production date"]
+    )
+
+    ingredient = st.selectbox(
+        "Ingredient",
+        ingredient_ref_table["display"].tolist(),
+        index=1
+    )
+    col1, col2 = st.columns(2)
+
+
+    st.subheader('Session Details')
+
 
     col1, col2 = st.columns(2)
     with col1:
+        rating = st.number_input('Rating', value=None, min_value=0, step=1, max_value=10)
         grind_size = st.number_input('Grind Size', value=None, min_value=0.1, max_value=30.0, step=0.1, format='%0.1f')
         extraction_time = st.number_input('Extraction Time', value=None, min_value=1, step=1, max_value=10000)
-        session_notes = st.text_area('Session Notes', '', height=50)
 
     with col2:
         water_temperature = st.number_input('Water Temperature', value=None, min_value=1, step=1, max_value=100)
+        quantity_in = st.number_input('Quantity Used', value=18.0, min_value=0.0, max_value=30.0, step=0.1, format='%0.1f')
         quantity_output = st.number_input('Quantity Out', value=None, min_value=0.1, max_value=1000.0, step=0.1, format='%0.1f')
-        extraction_notes = st.text_area('Extraction Notes', '', height=50)
 
-    with st.expander('Edit additional details'):
+    session_notes = st.text_area('Session Notes', '', height=50)
+    extraction_notes = ''
+
+    with st.expander('Edit additional details', icon='✏️'):
         
         st.subheader('General Information')
 
@@ -91,10 +119,6 @@ def main():
             water_type = st.radio(
                 'Water Type',
                 ('Filtered', 'Tap', 'Spring'),
-            )
-            session_type = st.radio(
-                'Session Type',
-                ('Coffee', 'Tea'),
             )
 
             brew_method = st.selectbox(
@@ -119,46 +143,18 @@ def main():
                 index=0
             )
 
-        # Ingredient section
-        st.subheader('Ingredient')
-        with st.expander('Show current ingredients:'):
-            st.write(ingredient_ref_table)
+            product_name, vendor_name, production_date = ingredient.split(" ------------ ")
 
-        col1, col2 = st.columns(2)
-
-        with col1:
-            ingredient_name = st.selectbox(
-                'Product Name',
-                ingredient_ref_table['name'].unique().tolist(),
-                index=1,
-                placeholder='Select product...'
-            )
-            ingredient_vendor_name = st.selectbox(
-                'Vendor Name',
-                ingredient_ref_table['vendor'].unique().tolist(),
-                index=1,
-                placeholder='Select vendor...'
-            )
-            production_date = st.date_input('Production Date', value='2025-10-27', min_value='1990-01-01', format='YYYY-MM-DD')
-
-        with col2:
-            role_ingredient = st.radio(
-                'Role',
-                ('Espresso Dose', 'Tea Dose'),
-            )
-            quantity_in = st.number_input('Quantity Used', value=18.0, min_value=0.0, max_value=30.0, step=0.1, format='%0.1f')
-
-        new_ingredient_rows = pd.DataFrame([{
-            'session_code': st.session_state.session_code,
-            'product_name': ingredient_name,
-            'vendor_name': ingredient_vendor_name,
-            'production_date': production_date,
-            'quantity_used': quantity_in,
-            'quantity_output': quantity_output,
-            'role': role_ingredient,
-            'batch_code': np.nan,
-            'unit': 'g'
-        }])
+            new_ingredient_rows = pd.DataFrame([{
+                "session_code": st.session_state.session_code,
+                "product_name": product_name,
+                "vendor_name": vendor_name,
+                "production_date": production_date,
+                "quantity_used": quantity_in,
+                "quantity_output": quantity_output,
+                "role": role_ingredient,
+                "unit": "g",
+            }])
 
         # Equipment section
         st.subheader('Equipment')
@@ -174,9 +170,6 @@ def main():
                 {"product_name": "notNeutral VERO Espresso Glass", "vendor_name": "Eight Ounce Coffee",
                     "role": "Cup"}
             ]
-
-        with st.expander('Show current equipment:'):
-            st.write(equip_ref_table)
 
         def add_entry():
             st.session_state.entries.append({
@@ -231,13 +224,12 @@ def main():
         new_equipment_rows['production_date'] = np.nan
         new_equipment_rows['quantity_used'] = 1
         new_equipment_rows['quantity_output'] = np.nan
-        new_equipment_rows['batch_code'] = np.nan
         new_equipment_rows['unit'] = 'pcs'
 
         # optionally reorder columns
         cols_order = [
             'session_code', 'product_name', 'vendor_name', 'production_date',
-            'quantity_used', 'quantity_output', 'batch_code', 'unit', 'role'
+            'quantity_used', 'quantity_output', 'unit', 'role'
         ]
 
         new_equipment_rows = new_equipment_rows.reindex(columns=cols_order)
@@ -253,13 +245,13 @@ def main():
             st.button('Remove Equipment', on_click=remove_entry, width='stretch')
 
     # Add preview section
-    with st.expander('Preview data before saving', expanded=False):
+    with st.expander('Preview data before saving', icon='🔍'):
         st.subheader('Session Data')
         preview_session = pd.DataFrame([[st.session_state['session_code'],
                                         brew_method, rating, water_type, session_type,
                                         session_datetime, favorite_flag, session_location_name,
                                         location_name, grind_size, session_notes]],
-                                    columns=st.session_state['sessions'].columns)
+                                    columns=st.session_state['sessions'].columns,)
         st.dataframe(preview_session)
         
         st.subheader('Extraction Data')
