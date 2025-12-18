@@ -10,9 +10,9 @@ INSERT INTO extractions (
 )
 SELECT
 	session_code::UUID,
-	extraction_number::INT,
-	extraction_time::INT,
-	water_temperature::INT,
+	extraction_number::NUMERIC::INT,
+	extraction_time::NUMERIC::INT,
+	water_temperature::NUMERIC::INT,
 	NULLIF(TRIM(notes),'')
 FROM raw.extractions;
 
