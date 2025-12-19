@@ -1,21 +1,20 @@
 import streamlit as st
-import uuid
 
 pages = {
     "Log": [
-        st.Page('log_coffee.py', title='Coffee'),
-        st.Page('log_tea.py', title='Tea'),
+        st.Page('pages/log/log_coffee.py', title='Coffee'),
+        st.Page('pages/log/log_tea.py', title='Tea'),
     ],
     "Dashboards" : [
-        st.Page('dashboard_inventory.py', title='Inventory'),
-        st.Page('dashboard_analytics.py', title='Analytics')
+        st.Page('pages/dashboard/dashboard_inventory.py', title='Inventory'),
+        st.Page('pages/dashboard/dashboard_analytics.py', title='Analytics')
     ],
     "Manage": [
-        st.Page('manage_sessions.py', title='Sessions'),
-        st.Page('manage_product.py', title='Products'),
-        st.Page('manage_vendor.py', title='Vendors'),
-        st.Page('manage_order.py', title='Orders'),
-        st.Page('manage_location.py', title='Locations'),
+        st.Page('pages/manage/manage_sessions.py', title='Sessions'),
+        st.Page('pages/manage/manage_product.py', title='Products'),
+        st.Page('pages/manage/manage_vendor.py', title='Vendors'),
+        st.Page('pages/manage/manage_order.py', title='Orders'),
+        st.Page('pages/manage/manage_location.py', title='Locations'),
     ]
 }
 
