@@ -97,3 +97,21 @@ SELECT EXISTS(SELECT 1 FROM util.product_countries_fk_review) AS has_fk_product_
 \else
   \echo '|    ✅ No FK issues in "product countries"'
 \endif
+
+DO $$
+BEGIN
+    IF EXISTS(SELECT 1 FROM util.session_batch_fk_review)
+       OR EXISTS(SELECT 1 FROM util.vendors_fk_review)
+       OR EXISTS(SELECT 1 FROM util.sessions_fk_review)
+       OR EXISTS(SELECT 1 FROM util.locations_fk_review)
+       OR EXISTS(SELECT 1 FROM util.extractions_fk_review)
+       OR EXISTS(SELECT 1 FROM util.products_fk_review)
+       OR EXISTS(SELECT 1 FROM util.products_coffee_fk_review)
+       OR EXISTS(SELECT 1 FROM util.products_tea_fk_review)
+       OR EXISTS(SELECT 1 FROM util.products_equipment_fk_review)
+       OR EXISTS(SELECT 1 FROM util.orders_fk_review)
+       OR EXISTS(SELECT 1 FROM util.order_items_fk_review)
+       OR EXISTS(SELECT 1 FROM util.product_countries_fk_review)
+    THEN RAISE EXCEPTION 'FK issues found';
+    END IF;
+END $$;

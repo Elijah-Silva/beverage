@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+trap 'echo -e "Subject: run_all.sh Failed\n\nFailed at line $LINENO\nSee /var/log/beverage/run_all.log for details" | msmtp elijah.silva@icloud.com' ERR
+exec 2>> /var/log/beverage/run_all.log
+
+echo "=== $(date) ===" >> /var/log/beverage/run_all.log
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SQL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"   # -> /sql
-PSQL="sudo -u postgres psql -d beverage -v ON_ERROR_STOP=1 -q"
+SQL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+PSQL="psql -d beverage -v ON_ERROR_STOP=1 -q"
 
 echo " -----------------------------------------------------"
 echo "|                                                     |"
@@ -96,10 +100,6 @@ echo "|                                                     |"
 echo " -----------------------------------------------------"
 echo ""
 
-# current inventory table
-echo "------------------------"
-echo "-- Current inventory  --"
-echo ""
 $PSQL -f "$SQL_DIR/util/100_inv_view.sql"
 
 # recent session table

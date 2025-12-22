@@ -127,7 +127,7 @@ SELECT
 	pe.clay_type,
 	CASE
 		WHEN m.material_id IS NULL THEN 'NO_MATCH_MATERIAL'
-		WHEN ct.clay_type_id IS NULL THEN 'NO_MATCH_CLAY_TYPE'
+		--WHEN ct.clay_type_id IS NULL THEN 'NO_MATCH_CLAY_TYPE'
 		ELSE 'OTHER'
 		END AS reason
 FROM stage.products_equipment pe
@@ -143,8 +143,8 @@ JOIN core.products            p
 	ON p.product_name = pe.product_name
 	AND p.vendor_id = cv.vendor_id
 	AND p.product_type_id = prt.product_type_id
-WHERE m.material_id IS NULL
-   OR ct.clay_type_id IS NULL;
+WHERE m.material_id IS NULL;
+   --OR ct.clay_type_id IS NULL;
 
 -- orders
 CREATE OR REPLACE VIEW util.orders_fk_review AS
@@ -270,7 +270,26 @@ WHERE p.product_type_id IN (SELECT
 	AND (v.vendor_id IS NULL
    OR s.session_id IS NULL
    OR p.product_id IS NULL
-   OR bi.batch_inventory_id IS NULL);
+   OR bi.batch_inventory_id IS NULL)
+
+UNION ALL
+
+select
+	sbi.session_code,
+	sbi.product_name,
+	sbi.vendor_name,
+	CASE
+		WHEN p.product_id IS NULL THEN 'NO_MATCH_PRODUCT'
+		ELSE 'OTHER'
+		END AS reason
+FROM stage.session_batch_inventory sbi
+LEFT JOIN core.vendors             v
+	ON v.vendor_name = sbi.vendor_name
+LEFT JOIN core.sessions            s
+	ON s.session_code = sbi.session_code
+LEFT JOIN core.products            p
+	ON p.product_name = sbi.product_name AND p.vendor_id = v.vendor_id
+WHERE p.product_id IS NULL;
 
 -- sessions
 CREATE OR REPLACE VIEW util.sessions_fk_review AS

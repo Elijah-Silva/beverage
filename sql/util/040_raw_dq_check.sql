@@ -62,3 +62,17 @@ SELECT EXISTS(SELECT 1 FROM util.raw_extractions_dq_review) AS has_raw_extractio
 \else
   \echo '|    ✅ No DQ issues in raw "sessions"'
 \endif
+
+DO $$
+BEGIN
+    IF EXISTS(SELECT 1 FROM util.raw_vendor_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_sessions_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_orders_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_session_batch_inv_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_order_items_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_locations_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_products_dq_review)
+       OR EXISTS(SELECT 1 FROM util.raw_extractions_dq_review)
+    THEN RAISE EXCEPTION 'Raw DQ issues found';
+    END IF;
+END $$;

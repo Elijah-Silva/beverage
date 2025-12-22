@@ -10,3 +10,10 @@ SELECT EXISTS(SELECT 1 FROM util.session_batch_dq_review) AS has_dq_issues \gset
 \else
   \echo '|    ✅ No DQ issues in "session_batch_inventory"'
 \endif
+
+DO $$
+BEGIN
+    IF EXISTS(SELECT 1 FROM util.session_batch_dq_review)
+    THEN RAISE EXCEPTION 'DQ issues found';
+    END IF;
+END $$;

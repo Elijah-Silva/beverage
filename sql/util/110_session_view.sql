@@ -37,7 +37,8 @@ SELECT
 	geq.quantity_output         AS output,
 	s.grind_size                AS grind,
 	e.extraction_time           AS time,
-	e.water_temperature         AS temp,
+	e.water_temperature         AS temp
+	/*
 	(SELECT
 		 STRING_AGG(product_alt_name, ', ') AS equipment
 	 FROM core.session_batch_inventory sbi
@@ -50,8 +51,9 @@ SELECT
 	                   FROM ref.roles
 	                   WHERE role_name NOT IN ('Espresso Dose', 'Tea Dose'))
 	   AND session_id = s.session_id)
-	--s.notes                     AS session_notes,
-	--e.notes                     AS extraction_notes
+	s.notes                     AS session_notes,
+	e.notes                     AS extraction_notes
+	*/
 FROM core.sessions              s
 LEFT JOIN core.extractions      e
 	USING (session_code)

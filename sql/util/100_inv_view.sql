@@ -44,15 +44,3 @@ JOIN core.products                    p
 	ON p.product_id = v.product_id
 GROUP BY p.product_id, p.product_name
 ORDER BY p.product_name;
-
-
-SELECT *
-FROM util.v_batch_inventory_remaining
-ORDER BY is_in_stock DESC, product_id, consumed_qty DESC;
-
-/*
-SELECT *
-FROM util.v_inventory_by_product
-ORDER BY product_id;
- */
-

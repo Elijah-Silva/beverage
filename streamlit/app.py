@@ -1,7 +1,12 @@
 import streamlit as st
+import subprocess
+from pathlib import Path
+
+SCRIPT_PATH = Path.home() / "beverage/sql/orchestration/run_all.sh"
+SCRIPT_DIR = SCRIPT_PATH.parent
 
 pages = {
-    "Log": [
+    "Logs": [
         st.Page('pages/log/log_coffee.py', title='Coffee'),
         st.Page('pages/log/log_tea.py', title='Tea'),
     ],
@@ -9,12 +14,15 @@ pages = {
         st.Page('pages/dashboard/dashboard_inventory.py', title='Inventory'),
         st.Page('pages/dashboard/dashboard_analytics.py', title='Analytics')
     ],
-    "Manage": [
+    "Management": [
         st.Page('pages/manage/manage_sessions.py', title='Sessions'),
         st.Page('pages/manage/manage_product.py', title='Products'),
         st.Page('pages/manage/manage_vendor.py', title='Vendors'),
         st.Page('pages/manage/manage_order.py', title='Orders'),
         st.Page('pages/manage/manage_location.py', title='Locations'),
+    ],
+    "SQL": [
+        st.Page('pages/sql/sql_runner.py', title='Data Explorer'),
     ]
 }
 
