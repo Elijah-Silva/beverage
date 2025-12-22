@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+exec >> /var/log/beverage/run_all.log 2>&1
 trap 'echo -e "Subject: run_all.sh Failed\n\nFailed at line $LINENO\nSee /var/log/beverage/run_all.log for details" | msmtp elijah.silva@icloud.com' ERR
-exec 2>> /var/log/beverage/run_all.log
 
 echo "=== $(date) ===" >> /var/log/beverage/run_all.log
 
