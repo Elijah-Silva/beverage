@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 from pathlib import Path
 import streamlit as st
+import subprocess
+import uuid
 
 path = Path("/home/elijah/beverage/data/last_run.txt")
 
@@ -31,17 +33,44 @@ pages = {
 }
 
 def main():
+    if "session_code" not in st.session_state:
+        st.session_state["session_code"] = uuid.uuid4()
+        
     pg = st.navigation(pages)
 
     with st.sidebar:
         try:
             ts = float(path.read_text().strip())
-            st.caption(f"Last sync: {datetime.fromtimestamp(ts):%m/%d %H:%M}")
+            age = (datetime.now().timestamp() - ts) / 60  # minutes
+            
+            icon = "🟢" if age < 60 else "🟡" if age < 120 else "🔴"
+            st.caption(f"{icon} Last sync: {datetime.fromtimestamp(ts):%m/%d %H:%M}")
         except:
-            st.caption("Sync: unknown")
+            st.caption("🔴 Sync: unknown")
+
+
+        st.sidebar.caption(f"Session: {str(st.session_state.session_code)[:8]}")
+
         st.write('----------'   )
+        
     # Development utilities
     with st.sidebar.expander("Dev Tools"):
+            if st.button("Run Pipeline"):
+                with st.spinner("Running..."):
+                    try:
+                        result = subprocess.run(
+                            ["sudo", "-u", "postgres", "/home/elijah/beverage/sql/orchestration/run_all.sh"],
+                            capture_output=True,
+                            text=True,
+                            timeout=300
+                        )
+                        if result.returncode == 0:
+                            st.success("Pipeline completed")
+                            st.rerun()
+                        else:
+                            st.error(f"Failed: {result.stderr}")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
             if st.button("Clear Session State"):
                 st.session_state.clear()
                 st.success("Session state cleared!")

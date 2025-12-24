@@ -110,14 +110,9 @@ default_extraction_number = 1
 
 
 def main():
-    # Initiliaze session state variables
-    if "session_code" not in st.session_state:
-         st.session_state["session_code"] = uuid.uuid4()
 
     if "coffee_product_entries" not in st.session_state:
          st.session_state["coffee_product_entries"] = default_equipment.copy()
-
-    st.sidebar.caption(f"Session: {st.session_state.session_code}")
 
     # Load csv files
     df_products = pd.read_csv(csv_file_path + "products.csv")
