@@ -37,7 +37,6 @@ INSERT INTO core.session_batch_inventory (
 	batch_inventory_id,
 	production_date,
 	quantity_used,
-	quantity_output,
 	unit
 )
 SELECT
@@ -45,7 +44,6 @@ SELECT
 	bi.batch_inventory_id,
 	sbi.production_date,
 	sbi.quantity_used,
-	sbi.quantity_output,
 	sbi.unit
 FROM stage.session_batch_inventory sbi
 JOIN core.vendors                  v

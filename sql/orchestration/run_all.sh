@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 exec >> /var/log/beverage/run_all.log 2>&1
-trap 'echo -e "Subject: run_all.sh Failed\n\nFailed at line $LINENO\nSee /var/log/beverage/run_all.log for details" | msmtp elijah.silva@icloud.com' ERR
+trap 'tac /var/log/beverage/run_all.log | sed "/===/q" | tac | (echo -e "To: elijah.silva@icloud.com\nSubject: run_all.sh Failed\n"; cat) | msmtp elijah.silva@icloud.com' ERR
 
 echo "=== $(date) ===" >> /var/log/beverage/run_all.log
 
@@ -107,3 +107,5 @@ echo "----------------------"
 echo "-- Recent sessions  --"
 echo ""
 $PSQL -f "$SQL_DIR/util/110_session_view.sql" | { head -n 2; tail -n 5; }
+
+date +%s > /home/elijah/beverage/data/last_run.txt

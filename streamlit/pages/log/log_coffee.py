@@ -112,10 +112,10 @@ default_extraction_number = 1
 def main():
     # Initiliaze session state variables
     if "session_code" not in st.session_state:
-        st.session_state["session_code"] = uuid.uuid4()
+         st.session_state["session_code"] = uuid.uuid4()
 
-    if "product_entries" not in st.session_state:
-        st.session_state.product_entries = default_equipment.copy()
+    if "coffee_product_entries" not in st.session_state:
+         st.session_state["coffee_product_entries"] = default_equipment.copy()
 
     st.sidebar.caption(f"Session: {st.session_state.session_code}")
 
@@ -266,11 +266,11 @@ def main():
     with st.expander('Equipment details', icon='⚙️'):
 
         def add_entry():
-            st.session_state.product_entries.append({"product_name": ""})
+             st.session_state["coffee_product_entries"].append({"product_name": ""})
 
         def remove_entry():
-            if len(st.session_state.product_entries) > 1:  # Keep at least one
-                st.session_state.product_entries.pop()
+            if len( st.session_state["coffee_product_entries"]) > 1:  # Keep at least one
+                 st.session_state["coffee_product_entries"].pop()
 
         equip_options = [
             {"product_name": "", "vendor_name": ""}
@@ -278,7 +278,7 @@ def main():
 
         updated_product_entries = []
 
-        for i, entry in enumerate(st.session_state.product_entries):
+        for i, entry in enumerate( st.session_state["coffee_product_entries"]):
             idx = next(
                 (
                     j
@@ -292,7 +292,7 @@ def main():
                 "Equipment",
                 options=equip_options,
                 index=idx,
-                key=f"equipment_{i}",
+                key=f"coffee_equipment_{i}",
                 format_func=lambda x: (
                     f'{x["product_name"]} — {x["vendor_name"]}'
                     if x["product_name"]
@@ -307,12 +307,11 @@ def main():
                     "vendor_name": equipment_selection["vendor_name"],
                     "production_date": entry.get("production_date", np.nan),
                     "quantity_used": entry.get("quantity_used", 1),
-                    "quantity_output": entry.get("quantity_output", np.nan),
                     "unit": entry.get("unit", "pcs"),
                 }
             )
 
-        st.session_state.product_entries = updated_product_entries
+        st.session_state["coffee_product_entries"] = updated_product_entries
 
         col1, col2 = st.columns(2)
         col1.button("Add Equipment", on_click=add_entry, width="stretch")
@@ -323,7 +322,7 @@ def main():
         new_session_row = pd.DataFrame(
             [
                 {
-                    "session_code": st.session_state["session_code"],
+                    "session_code":  st.session_state["session_code"],
                     "brewing_method_name": brew_method,
                     "rating": rating,
                     "water_type": water_type,
@@ -341,10 +340,11 @@ def main():
         new_extraction_row = pd.DataFrame(
             [
                 {
-                    "session_code": st.session_state["session_code"],
+                    "session_code":  st.session_state["session_code"],
                     "extraction_number": extraction_number,
                     "extraction_time": extraction_time,
                     "water_temperature": water_temperature,
+                    "quantity_output": quantity_output, 
                     "notes": extraction_notes,
                 }
             ]
@@ -358,21 +358,19 @@ def main():
                     "vendor_name": ing_vendor_name,
                     "production_date": ing_production_date,
                     "quantity_used": quantity_in,
-                    "quantity_output": quantity_output,
                     "unit": "g",
                 }
             ]
         )
 
         new_equipment_rows = pd.DataFrame.from_records(
-            st.session_state.product_entries,
+             st.session_state["coffee_product_entries"],
             columns=[
                 "session_code",
                 "product_name",
                 "vendor_name",
                 "production_date",
                 "quantity_used",
-                "quantity_output",
                 "unit",
             ],
         )
@@ -459,14 +457,14 @@ def main():
                 st.stop()
 
         # Session stage variables & rerun
-        st.session_state["save_success"] = True
+        st.session_state["coffee_save_success"] = True
         st.session_state["session_code"] = uuid.uuid4()
         st.rerun()
 
     # Show success message if data was saved succesfully
-    if st.session_state.get("save_success", False):
+    if st.session_state.get("coffee_save_success", False):
         st.success("✅ Successfully saved all brewing data!")
-        st.session_state["save_success"] = False
+        st.session_state["coffee_save_success"] = False
 
 
 if __name__ == "__main__":

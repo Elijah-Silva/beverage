@@ -1,20 +1,19 @@
 SET SEARCH_PATH = util;
 
 CREATE VIEW util.recent_sessions AS
-WITH get_espresso_quantity AS
+WITH get_brew_quantity AS
 	     (SELECT
 		      sbi.session_id,
-		      sbi.quantity_used,
-		      sbi.quantity_output
+		      sbi.quantity_used
 	      FROM core.session_batch_inventory sbi
 	      JOIN core.batch_inventory         bi
 		      USING (batch_inventory_id)
 	      JOIN core.products                p
 		      USING (product_id)
-	      WHERE role_id = (SELECT
-		                       role_id
-	                       FROM ref.roles
-	                       WHERE role_name = 'Espresso Dose'))
+	      WHERE role_id IN (
+			SELECT role_id
+			FROM ref.roles
+			WHERE role_name IN ( 'Tea Dose', 'Espresso Dose')))
 SELECT
 	s.session_id                AS id,
 	TO_CHAR(s.session_date, 'YYYY-MM-DD HH24:MI') AS date,
@@ -33,8 +32,7 @@ SELECT
 	                   WHERE role_name IN ('Espresso Dose', 'Tea Dose'))
 	   AND session_id = s.session_id),
 	s.rating,
-	geq.quantity_used           AS input,
-	geq.quantity_output         AS output,
+	gbq.quantity_used           AS input,
 	s.grind_size                AS grind,
 	e.extraction_time           AS time,
 	e.water_temperature         AS temp
@@ -57,8 +55,8 @@ SELECT
 FROM core.sessions              s
 LEFT JOIN core.extractions      e
 	USING (session_code)
-LEFT JOIN get_espresso_quantity geq
-	ON geq.session_id = s.session_id
+LEFT JOIN get_brew_quantity gbq
+	ON gbq.session_id = s.session_id
 JOIN ref.brewing_methods        bm
 	USING (brewing_method_id);
 

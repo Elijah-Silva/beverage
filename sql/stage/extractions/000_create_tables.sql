@@ -5,5 +5,6 @@ CREATE TABLE extractions (
 	extraction_number	INT,
 	extraction_time		INT,
 	water_temperature	INT,
-	notes		TEXT
+	quantity_output 	NUMERIC,
+	notes				TEXT
 );

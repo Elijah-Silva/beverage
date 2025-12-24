@@ -8,7 +8,6 @@ def main():
 
     # Load CSV
     df_vendors = pd.read_csv(csv_file_path + 'vendors.csv')
-    df_vendors = df_vendors.reset_index(drop=True)  # clean index
 
     # Show editor
     edited_vendors = st.data_editor(df_vendors, num_rows="dynamic", use_container_width=True)

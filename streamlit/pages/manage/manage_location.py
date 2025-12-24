@@ -8,7 +8,6 @@ def main():
 
     # Load CSV
     df_locations = pd.read_csv(csv_file_path + 'locations.csv')
-    df_locations = df_locations
 
     # Show editor
     edited_locations = st.data_editor(df_locations, num_rows="dynamic", use_container_width=True)

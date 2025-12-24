@@ -22,6 +22,5 @@ CREATE TABLE session_batch_inventory
 	vendor_name     TEXT,
 	production_date DATE,
 	quantity_used   NUMERIC,
-	quantity_output NUMERIC,
 	unit            TEXT
 );

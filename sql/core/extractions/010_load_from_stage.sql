@@ -7,6 +7,7 @@ INSERT INTO core.extractions (
 	extraction_number,
 	extraction_time,
 	water_temperature,
+	quantity_output,
 	notes
 )
 SELECT
@@ -15,6 +16,7 @@ SELECT
 	e.extraction_number,
 	e.extraction_time,
 	e.water_temperature,
+	quantity_output,
 	e.notes
 FROM stage.extractions e
 JOIN core.sessions     s

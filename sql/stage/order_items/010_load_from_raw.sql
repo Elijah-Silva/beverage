@@ -14,7 +14,7 @@ SELECT
 	TRIM(product_name),
 	production_date::DATE,
 	unit_price::NUMERIC(9, 2),
-	quantity_count::INT,
+	quantity_count::NUMERIC::INT,
 	quantity_weight::NUMERIC(7, 2),
 	subtotal::NUMERIC(9, 2)
 FROM raw.order_items;

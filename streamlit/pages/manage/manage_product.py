@@ -5,56 +5,51 @@ csv_file_path = '/home/elijah/beverage/data/raw/'
 
 def main():
     df = pd.read_csv(csv_file_path + "products.csv")
-
     tea = df[df["product_type_name"] == "Tea"]
     coffee = df[df["product_type_name"] == "Coffee"]
     equipment = df[df["product_type_name"] == "Equipment"]
-
-    tea = tea.reset_index(drop=True)
-    coffee = coffee.reset_index(drop=True)
-    equipment = equipment.reset_index(drop=True)
-
+    
     st.title('Product data')
-
+    
     st.header("Tea")
     tea_cols = ['product_name', 'product_alt_name', 'product_type_name', 'vendor_name',
                 'role', 'region','altitude_meters', 'processing_method', 'tea_type',
                 'cultivar', 'is_active', 'notes']
-    edited_tea = st.data_editor(tea[tea_cols], num_rows="dynamic")
+    edited_tea = st.data_editor(tea[tea_cols].reset_index(drop=True), num_rows="dynamic")
     
     st.write('---')
-
     st.header("Coffee")
     coffee_cols = ['product_name', 'product_alt_name', 'product_type_name', 'vendor_name',
                    'role', 'region', 'roast_level', 'origin_type', 'varietal', 'altitude_meters', 
                    'processing_method', 'is_active', 'notes']
-    edited_coffee = st.data_editor(coffee[coffee_cols], num_rows="dynamic")
+    edited_coffee = st.data_editor(coffee[coffee_cols].reset_index(drop=True), num_rows="dynamic")
     
     st.write('---')
-
     st.header("Equipment")
     equipment_cols = ['product_name', 'product_alt_name', 'product_type_name', 'vendor_name',
                       'role', 'material', 'volume', 'clay_type', 'pour_speed', 'color', 'is_active',
                       'notes']
-    edited_equipment = st.data_editor(equipment[equipment_cols], num_rows="dynamic")
-
+    edited_equipment = st.data_editor(equipment[equipment_cols].reset_index(drop=True), num_rows="dynamic")
+    
     st.write("---")
+    
     changed = []
-
-    # Compare only the editable columns
-    if not edited_tea.equals(tea[tea_cols]):
+    
+    # Check for changes (including new rows)
+    if not edited_tea.equals(tea[tea_cols]) or len(edited_tea) != len(tea):
         changed.append("Tea")
-        tea.update(edited_tea)
-    if not edited_coffee.equals(coffee[coffee_cols]):
+    if not edited_coffee.equals(coffee[coffee_cols]) or len(edited_coffee) != len(coffee):
         changed.append("Coffee")
-        coffee.update(edited_coffee)
-    if not edited_equipment.equals(equipment[equipment_cols]):
+    if not edited_equipment.equals(equipment[equipment_cols]) or len(edited_equipment) != len(equipment):
         changed.append("Equipment")
-        equipment.update(edited_equipment)
-
+    
     if st.button("Save", use_container_width=True):
         if changed:
-            edited_all = pd.concat([tea, coffee, equipment])
+            # Remove the filtered categories from original df
+            df = df[~df["product_type_name"].isin(["Tea", "Coffee", "Equipment"])]
+            
+            # Concatenate with edited versions
+            edited_all = pd.concat([df, edited_tea, edited_coffee, edited_equipment], ignore_index=True)
             edited_all.to_csv(csv_file_path + "products.csv", index=False)
             st.success(f"Updated: {', '.join(changed)}")
         else:

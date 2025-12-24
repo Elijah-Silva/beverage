@@ -15,12 +15,12 @@ def main():
     df_session_batch_inventory = pd.read_csv(
         csv_file_path + "session_batch_inventory.csv"
     )
-    st.title('Coffee Brewing Trends')
-    df_sessions = df_sessions[df_sessions['session_type'].isin(['Coffee'])]
+    st.title('Tea Drinking Trends')
+    df_sessions = df_sessions[df_sessions['session_type'].isin(['Tea'])]
     df_sessions['session_date'] = pd.to_datetime(df_sessions['session_date'], format='ISO8601')
 
 
-    st.subheader('Espressos per day')
+    st.subheader('Tea\'s per day')
     # Count coffees per day
     daily_data = df_sessions.groupby(pd.Grouper(key='session_date', freq='D')).size().reset_index(name='coffee_count')
     # Create a bar chart
@@ -43,30 +43,6 @@ def main():
     daily_rating = df_sessions[['session_date', 'rating']]
     daily_rating = daily_rating.groupby(pd.Grouper(key='session_date', freq='D')).mean().reset_index()
     st.bar_chart(data=daily_rating, x='session_date', y='rating')
-
-    st.subheader('Grind size over time')
-    df = df_sessions.copy()
-    df['session_date'] = pd.to_datetime(df['session_date'])
-    df = df.dropna(subset=['grind_size'])
-
-    # 7-session rolling mean (event-based, not calendar-based)
-    df = df.sort_values('session_date')
-    df['trend'] = df['grind_size'].rolling(7, min_periods=1).mean()
-
-    st.altair_chart(
-        alt.layer(
-            alt.Chart(df).mark_circle(size=60, opacity=0.4).encode(
-                x='session_date:T',
-                y='grind_size:Q'
-            ),
-            alt.Chart(df).mark_line(strokeWidth=3).encode(
-                x='session_date:T',
-                y='trend:Q'
-            )
-        ),
-        use_container_width=True
-    )
-
 
     st.subheader('Most popular drinking spots')
     st.text('In development')

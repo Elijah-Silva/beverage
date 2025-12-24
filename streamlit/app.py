@@ -1,18 +1,22 @@
-import streamlit as st
-import subprocess
-from pathlib import Path
 
-SCRIPT_PATH = Path.home() / "beverage/sql/orchestration/run_all.sh"
-SCRIPT_DIR = SCRIPT_PATH.parent
+import os
+from datetime import datetime
+from pathlib import Path
+import streamlit as st
+
+path = Path("/home/elijah/beverage/data/last_run.txt")
 
 pages = {
     "Logs": [
         st.Page('pages/log/log_coffee.py', title='Coffee'),
         st.Page('pages/log/log_tea.py', title='Tea'),
     ],
-    "Dashboards" : [
+    "Overview" : [
         st.Page('pages/dashboard/dashboard_inventory.py', title='Inventory'),
-        st.Page('pages/dashboard/dashboard_analytics.py', title='Analytics')
+    ],
+    "Analytics" : [
+        st.Page('pages/dashboard/dashboard_coffee_analytics.py', title='Coffee'),
+        st.Page('pages/dashboard/dashboard_tea_analytics.py', title='Tea')
     ],
     "Management": [
         st.Page('pages/manage/manage_sessions.py', title='Sessions'),
@@ -29,8 +33,15 @@ pages = {
 def main():
     pg = st.navigation(pages)
 
+    with st.sidebar:
+        try:
+            ts = float(path.read_text().strip())
+            st.caption(f"Last sync: {datetime.fromtimestamp(ts):%m/%d %H:%M}")
+        except:
+            st.caption("Sync: unknown")
+        st.write('----------'   )
     # Development utilities
-    with st.sidebar.expander("Development Utilities"):
+    with st.sidebar.expander("Dev Tools"):
             if st.button("Clear Session State"):
                 st.session_state.clear()
                 st.success("Session state cleared!")
