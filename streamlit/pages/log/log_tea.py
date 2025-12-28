@@ -185,7 +185,8 @@ def main():
         col1, col2, col3 = st.columns(3)
         with col1:
             rating = st.number_input(
-                "Rating", value=None, min_value=0, step=1, max_value=10
+                "Rating", value=None, min_value=0, step=1, max_value=10,
+                key=f"rating_{st.session_state.session_code}"
             )
         
         with col2:
@@ -196,6 +197,7 @@ def main():
                 max_value=30.0,
                 step=0.1,
                 format="%0.1f",
+                key=f"quantity_in_{st.session_state.session_code}"
             )
         
         with col3:
@@ -205,7 +207,7 @@ def main():
                 placeholder="Select brew method...",
             )
 
-        session_notes = st.text_area("Session Notes", "", height=50)
+        session_notes = st.text_area("Session Notes", "", height=50, key=f"session_notes_{st.session_state.session_code}")
 
     # Extractions section (multiple)
     with st.expander("Extractions", icon="🫖", expanded=True):
@@ -488,6 +490,7 @@ def main():
         # Session stage variables & rerun
         st.session_state["tea_save_success"] = True
         st.session_state["session_code"] = uuid.uuid4()
+        st.session_state["tea_product_entries"] = default_equipment.copy()  # Add this
         st.session_state["tea_extraction_entries"] = [{
             "extraction_number": 1, 
             "extraction_time": None, 

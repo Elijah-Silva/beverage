@@ -179,7 +179,8 @@ def main():
         col1, col2, col3, col4, col5, col6 = st.columns(6)
         with col1:
             rating = st.number_input(
-                "Rating", value=None, min_value=0, step=1, max_value=10
+                "Rating", value=None, min_value=0, step=1, max_value=10,
+                key=f"rating_{st.session_state.session_code}"
             )
 
         with col2:
@@ -190,16 +191,19 @@ def main():
                 max_value=30.0,
                 step=0.1,
                 format="%0.1f",
+                key=f"grind_size_{st.session_state.session_code}"
             )
 
 
         with col3:
             water_temperature = st.number_input(
-                "Temperature", value=None, min_value=1, step=1, max_value=100
+                "Temperature", value=None, min_value=1, step=1, max_value=100,
+                key=f"water_temperature_{st.session_state.session_code}"
             )
         with col4:
             extraction_time = st.number_input(
-                "Extraction Time", value=None, min_value=1, step=1, max_value=10000
+                "Extraction Time", value=None, min_value=1, step=1, max_value=10000,
+                key=f"extraction_time_{st.session_state.session_code}"
             )
         
         with col5:
@@ -220,9 +224,10 @@ def main():
                 max_value=1000.0,
                 step=0.1,
                 format="%0.1f",
+                key=f"quantity_output_{st.session_state.session_code}"
             )
 
-        session_notes = st.text_area("Session Notes", "", height=50)
+        session_notes = st.text_area("Session Notes", "", height=50, key=f"session_notes_{st.session_state.session_code}")
         extraction_notes = ""
 
     # Additional details section
@@ -454,6 +459,7 @@ def main():
         # Session stage variables & rerun
         st.session_state["coffee_save_success"] = True
         st.session_state["session_code"] = uuid.uuid4()
+        st.session_state["coffee_product_entries"] = default_equipment.copy()
         st.rerun()
 
     # Show success message if data was saved succesfully
