@@ -237,7 +237,7 @@ def main():
                     min_value=1, 
                     step=1, 
                     max_value=100,
-                    key=f"tea_temp_{i}"
+                    key=f"tea_temp_{i}_{st.session_state.session_code}"
                 )
             with col2:
                 extraction["extraction_time"] = st.number_input(
@@ -246,7 +246,7 @@ def main():
                     min_value=1, 
                     step=1, 
                     max_value=10000,
-                    key=f"tea_time_{i}"
+                    key=f"tea_time_{i}_{st.session_state.session_code}"
                 )
             with col3:
                 extraction["quantity_output"] = st.number_input(
@@ -256,14 +256,14 @@ def main():
                     max_value=1000.0,
                     step=0.1,
                     format="%0.1f",
-                    key=f"tea_output_{i}"
+                    key=f"tea_output_{i}_{st.session_state.session_code}"
                 )
             
             extraction["notes"] = st.text_area(
                 "Extraction Notes", 
                 extraction["notes"], 
                 height=50,
-                key=f"tea_extraction_notes_{i}"
+                key=f"tea_extraction_notes_{i}_{st.session_state.session_code}"
             )
         
         col1, col2 = st.columns(2)
